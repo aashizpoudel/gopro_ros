@@ -1,0 +1,24 @@
+= gopro_ros -- GoPro stream to ROS topic
+
+== Demo
+
+To see all the nodes in this package in action, you can launch a demo from ROS. There are no
+dependencies other than the standard ROS packages.
+
+     roslaunch gopro_ros demo.launch
+     
+
+== ROS API
+
+=== 1. gopro_ros
+
+
+`~port` (double)::
+The port to use.
+
+
+
+==== Published Topics
+
+`~image` -- (sensor_msgs/Image)::
+The image from gopro

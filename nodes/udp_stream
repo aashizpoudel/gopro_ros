@@ -1,0 +1,72 @@
+#! /usr/bin/env python
+from __future__ import division
+
+import rospy
+from geometry_msgs.msg import Twist
+from std_msgs.msg import Int32
+from sensor_msgs.msg import Image
+from gopro_ros import gopro
+from cv_bridge import CvBridge
+import cv2 as cv
+import logging
+class ControllerNode:
+    def __init__(self):
+        # self.buffer = []
+        # self.controller = gopro.Player()
+        self.buffer = []
+        self.bridge = CvBridge()
+        # image_message = 
+
+    def main(self):
+        self.imagePub = rospy.Publisher('image',
+                                       Image, queue_size=1)
+
+        rospy.init_node('udp_stream')
+        self.nodeName = rospy.get_name()
+        rospy.loginfo("{0} started".format(self.nodeName))
+        self.port = int(rospy.get_param('~port',8554))
+        # print(self.STREAM_URL.format(self.port))
+        # self.controller.start(self.STREAM_URL.format(self.port))
+
+        self.rate = float(rospy.get_param('~rate', 1.0))
+        self.timeout = float(rospy.get_param('~timeout', 0.2))
+
+        rate = rospy.Rate(self.rate)
+        self.lastPublishTime = rospy.get_time()
+        self.url = f"udp://@0.0.0.0:{self.port}"
+        self._vid = cv.VideoCapture(self.url + "?overrun_nonfatal=1&fifo_size=50000000", cv.CAP_FFMPEG)
+        # self._player_started.set()
+        if self._vid.isOpened():
+                rospy.loginfo('Stream is connected')
+        logging.info("Player started.")
+        while not rospy.is_shutdown():
+            if self._vid.isOpened():
+                # rospy.loginfo('Stream is connected')
+                ret, frame = self._vid.read()
+                if ret and len(self.buffer) < 5:
+                    self.buffer.append(frame)
+                self.publish()
+            else:
+                rospy.loginfo('Stream is not connected')
+                self._vid.release()
+                rate.sleep()
+                self._vid = cv.VideoCapture(self.url + "?overrun_nonfatal=1&fifo_size=50000000", cv.CAP_FFMPEG)
+        
+        if self._vid.isOpened():
+            self._vid.release()
+
+    def publish(self):
+        if (rospy.get_time() - self.lastPublishTime > self.timeout) and len(self.buffer)>0:
+            img = self.buffer.pop(-1)
+            # print(img.shape)
+            img_msg = self.bridge.cv2_to_imgmsg(img, encoding="passthrough")
+            self.imagePub.publish(img_msg)
+            self.lastPublishTime = rospy.get_time()
+
+   
+if __name__ == '__main__':
+    try:
+        node = ControllerNode()
+        node.main()
+    except rospy.ROSInterruptException:
+        pass

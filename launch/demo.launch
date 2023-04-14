@@ -1,0 +1,30 @@
+<launch>
+
+    <arg name="port" value="8554" />
+    <arg name="resolution" value="12" /> 
+    <!-- 480p=>4 720p=>7 1080p=>12 -->
+    <arg name="fov" value="0" />
+
+    <node name="gopro_camera" ns='gopro_ros' pkg="gopro_ros" type="gopro_camera"
+          output="screen">
+      <rosparam subst_value="true">
+        port: $(arg port)
+        resolution: $(arg resolution)
+        fov: $(arg fov)
+        timeout: 1.0
+      </rosparam>
+    </node>
+    
+    <node name="gopro_stream" ns='gopro_ros' pkg="gopro_ros" type="udp_stream"
+          output="screen">
+      <rosparam subst_value="true">
+        port: $(arg port)
+        resolution: $(arg resolution)
+        fov: $(arg fov)
+        timeout: 1.0
+      </rosparam>
+      <!-- <<remap from="image" to=""/> -->
+    </node>
+  
+ 
+  </launch>
