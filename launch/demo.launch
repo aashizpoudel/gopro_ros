@@ -25,6 +25,10 @@
       </rosparam>
       <!-- <<remap from="image" to=""/> -->
     </node>
+<!-- node to preview stream from the browser, port on 8080 -->
+    <node pkg="web_video_server" type="web_video_server" name="web_video_server">
+      
+    </node>
   
  
   </launch>

@@ -59,7 +59,7 @@ class ControllerNode:
         if (rospy.get_time() - self.lastPublishTime > self.timeout) and len(self.buffer)>0:
             img = self.buffer.pop(-1)
             # print(img.shape)
-            img_msg = self.bridge.cv2_to_imgmsg(img, encoding="passthrough")
+            img_msg = self.bridge.cv2_to_imgmsg(img, encoding="bgr8")
             self.imagePub.publish(img_msg)
             self.lastPublishTime = rospy.get_time()
 
